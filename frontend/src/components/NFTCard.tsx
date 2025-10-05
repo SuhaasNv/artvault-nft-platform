@@ -73,6 +73,7 @@ function NFTCardContent({ tokenId }: NFTCardProps) {
             onLoad={() => {
               console.log('✅ Image loaded successfully for NFT #' + tokenId + ':', nft.metadata?.image);
             }}
+            loading="lazy"
           />
         ) : null}
         

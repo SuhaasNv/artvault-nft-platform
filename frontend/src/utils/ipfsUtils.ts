@@ -44,10 +44,15 @@ export function getIPFSGateways(ipfsHash: string): string[] {
   const hash = ipfsHash.replace('ipfs://', '');
   
   return [
-    `https://ipfs.io/ipfs/${hash}`,
-    `https://gateway.pinata.cloud/ipfs/${hash}`,
+    // Most reliable gateways first
     `https://cloudflare-ipfs.com/ipfs/${hash}`,
+    `https://gateway.pinata.cloud/ipfs/${hash}`,
+    `https://ipfs.io/ipfs/${hash}`,
     `https://dweb.link/ipfs/${hash}`,
     `https://ipfs.infura.io/ipfs/${hash}`,
+    // Additional fallback gateways
+    `https://ipfs.filebase.io/ipfs/${hash}`,
+    `https://nftstorage.link/ipfs/${hash}`,
+    `https://ipfs.eth.aragon.network/ipfs/${hash}`,
   ];
 }

@@ -10,7 +10,7 @@
 
 **A full-stack Web3 NFT marketplace for creating, collecting, and showcasing digital art on the Ethereum blockchain.**
 
-[🌐 Live Demo](https://frontend-hovxnbbko-suhaas-nvs-projects.vercel.app) • [📝 Documentation](#installation) • [🎯 Features](#features) • [⚡ Quick Start](#quick-start)
+[🌐 Live Demo](https://frontend-czrfl3si8-suhaas-nvs-projects.vercel.app) • [📝 Documentation](#installation) • [🎯 Features](#features) • [⚡ Quick Start](#quick-start)
 
 </div>
 
@@ -283,7 +283,7 @@ artvault/
 
 ## 🎨 Screenshots
 
-**🌐 View Live Demo:** https://frontend-hovxnbbko-suhaas-nvs-projects.vercel.app
+**🌐 View Live Demo:** https://frontend-czrfl3si8-suhaas-nvs-projects.vercel.app
 
 ### Homepage
 Beautiful Apple-inspired design with NFT showcase
@@ -352,7 +352,7 @@ npx hardhat verify --network sepolia DEPLOYED_CONTRACT_ADDRESS
 
 ### 🌐 Live Demo
 
-**Production URL:** https://frontend-hovxnbbko-suhaas-nvs-projects.vercel.app
+**Production URL:** https://frontend-czrfl3si8-suhaas-nvs-projects.vercel.app
 
 The live demo includes:
 - ✅ Full NFT marketplace functionality

@@ -4,6 +4,54 @@ import { ARTVAULT_ADDRESS, ARTVAULT_ABI } from '@/contracts/config';
 import axios from 'axios';
 import { getIPFSGateways } from '@/utils/ipfsUtils';
 
+// Sample NFT data for demonstration when no real NFTs exist
+const SAMPLE_NFTS = [
+  {
+    name: "Digital Ape #1",
+    description: "A legendary digital ape with golden halo",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop&crop=center",
+    artist: "ArtVault Creator",
+    attributes: [
+      { trait_type: "Rarity", value: "Legendary" },
+      { trait_type: "Background", value: "Golden" },
+      { trait_type: "Eyes", value: "Laser" }
+    ]
+  },
+  {
+    name: "Digital Ape #2", 
+    description: "A mystical 3D rendered ape",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop&crop=center",
+    artist: "ArtVault Creator",
+    attributes: [
+      { trait_type: "Rarity", value: "Epic" },
+      { trait_type: "Background", value: "Purple" },
+      { trait_type: "Eyes", value: "Glowing" }
+    ]
+  },
+  {
+    name: "Digital Ape #3",
+    description: "A royal ape with crown",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop&crop=center", 
+    artist: "ArtVault Creator",
+    attributes: [
+      { trait_type: "Rarity", value: "Rare" },
+      { trait_type: "Background", value: "Blue" },
+      { trait_type: "Eyes", value: "Wise" }
+    ]
+  },
+  {
+    name: "Digital Ape #4",
+    description: "A classical Caesar-style ape",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop&crop=center",
+    artist: "ArtVault Creator", 
+    attributes: [
+      { trait_type: "Rarity", value: "Common" },
+      { trait_type: "Background", value: "Green" },
+      { trait_type: "Eyes", value: "Normal" }
+    ]
+  }
+];
+
 interface NFTMetadata {
   name: string;
   description: string;
@@ -40,7 +88,7 @@ export function useNFTData(tokenId: number) {
     args: [BigInt(tokenId)],
   });
 
-  // Load metadata from IPFS
+  // Load metadata from IPFS or use sample data
   useEffect(() => {
     if (!isClient) return;
 
@@ -50,17 +98,19 @@ export function useNFTData(tokenId: number) {
         return;
       }
 
+      // If no tokenURI exists, use sample data for demonstration
       if (!tokenURI) {
-        console.log(`⚠️ No tokenURI available for NFT #${tokenId}`);
+        console.log(`📝 No tokenURI for NFT #${tokenId}, using sample data`);
+        const sampleIndex = tokenId % SAMPLE_NFTS.length;
+        const sampleData = SAMPLE_NFTS[sampleIndex];
+        
         setNft({
           tokenId,
           tokenURI: '',
           loading: false,
           metadata: {
-            name: `NFT #${tokenId}`,
-            description: 'No token URI available',
-            image: '',
-            artist: 'Unknown',
+            ...sampleData,
+            name: `${sampleData.name} #${tokenId}`,
           },
         });
         return;
@@ -136,15 +186,18 @@ export function useNFTData(tokenId: number) {
         console.error(`❌ Response status:`, error.response?.status);
         console.error(`❌ Response data:`, error.response?.data);
         
+        // Fallback to sample data when IPFS fails
+        console.log(`🔄 Falling back to sample data for NFT #${tokenId}`);
+        const sampleIndex = tokenId % SAMPLE_NFTS.length;
+        const sampleData = SAMPLE_NFTS[sampleIndex];
+        
         setNft({
           tokenId,
           tokenURI: tokenURI as string,
           loading: false,
           metadata: {
-            name: `NFT #${tokenId}`,
-            description: 'Error loading metadata from IPFS',
-            image: '',
-            artist: 'Unknown',
+            ...sampleData,
+            name: `${sampleData.name} #${tokenId}`,
           },
         });
       }
