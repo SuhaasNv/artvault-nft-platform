@@ -131,10 +131,10 @@ export default function MintPage() {
       });
 
       // The transaction status will be handled by the useWaitForTransactionReceipt hook
-    } catch (error: any) {
+      } catch (error: unknown) {
       console.error('❌ Minting error:', error);
       setMintingStatus('error');
-      setErrorMessage(error.message || 'Failed to mint NFT. Please try again.');
+      setErrorMessage((error as Error).message || 'Failed to mint NFT. Please try again.');
       setIsUploading(false);
     }
   };
