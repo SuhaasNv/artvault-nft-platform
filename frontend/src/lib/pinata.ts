@@ -8,6 +8,7 @@ import axios from 'axios';
 
 const PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY;
 const PINATA_SECRET_KEY = process.env.NEXT_PUBLIC_PINATA_SECRET_KEY;
+const PINATA_JWT = process.env.NEXT_PUBLIC_PINATA_JWT; // Optional: Prefer JWT on Vercel
 const PINATA_BASE_URL = 'https://api.pinata.cloud';
 const PINATA_GATEWAY = 'https://gateway.pinata.cloud/ipfs';
 
@@ -37,17 +38,29 @@ export async function uploadImageToIPFS(file: File): Promise<string> {
       {
         maxBodyLength: Infinity,
         headers: {
-          'Content-Type': `multipart/form-data`,
-          pinata_api_key: PINATA_API_KEY!,
-          pinata_secret_api_key: PINATA_SECRET_KEY!,
+          // Let the browser set the proper multipart boundary
+          // Do not set 'Content-Type' manually for FormData
+          ...(PINATA_JWT
+            ? { Authorization: `Bearer ${PINATA_JWT}` }
+            : {
+                pinata_api_key: (PINATA_API_KEY as string) || '',
+                pinata_secret_api_key: (PINATA_SECRET_KEY as string) || '',
+              }),
         },
       }
     );
 
     return response.data.IpfsHash;
   } catch (error) {
-    console.error('Error uploading image to IPFS:', error);
-    throw new Error('Failed to upload image to IPFS');
+    const err = error as any;
+    console.error('Error uploading image to IPFS:', {
+      message: err?.message,
+      status: err?.response?.status,
+      data: err?.response?.data,
+    });
+    throw new Error(
+      `Failed to upload image to IPFS${err?.response?.status ? ` (status ${err.response.status})` : ''}`
+    );
   }
 }
 
@@ -69,16 +82,27 @@ export async function uploadMetadataToIPFS(metadata: {
       {
         headers: {
           'Content-Type': 'application/json',
-          pinata_api_key: PINATA_API_KEY!,
-          pinata_secret_api_key: PINATA_SECRET_KEY!,
+          ...(PINATA_JWT
+            ? { Authorization: `Bearer ${PINATA_JWT}` }
+            : {
+                pinata_api_key: (PINATA_API_KEY as string) || '',
+                pinata_secret_api_key: (PINATA_SECRET_KEY as string) || '',
+              }),
         },
       }
     );
 
     return response.data.IpfsHash;
   } catch (error) {
-    console.error('Error uploading metadata to IPFS:', error);
-    throw new Error('Failed to upload metadata to IPFS');
+    const err = error as any;
+    console.error('Error uploading metadata to IPFS:', {
+      message: err?.message,
+      status: err?.response?.status,
+      data: err?.response?.data,
+    });
+    throw new Error(
+      `Failed to upload metadata to IPFS${err?.response?.status ? ` (status ${err.response.status})` : ''}`
+    );
   }
 }
 
