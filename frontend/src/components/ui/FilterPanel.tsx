@@ -40,7 +40,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
     <div className={`relative ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
+        className="flex items-center gap-2 px-4 py-3 bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm"
       >
         <Filter className="w-5 h-5 text-gray-600" />
         <span className="text-gray-700 font-medium">Filters</span>
@@ -51,7 +51,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 p-6 space-y-6">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-300 rounded-xl shadow-xl z-50 p-6 space-y-6">
           {/* Sort Options */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">Sort By</label>
@@ -85,7 +85,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
               placeholder="Enter wallet address..."
               value={filters.owner || ''}
               onChange={(e) => handleFilterChange('owner', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             />
           </div>
 

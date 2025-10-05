@@ -19,24 +19,24 @@ export const filterAndSortNFTs = (nfts: NFTData[], searchQuery: string, filters:
   if (searchQuery.trim()) {
     const query = searchQuery.toLowerCase();
     filtered = filtered.filter(nft => 
-      nft.name.toLowerCase().includes(query) ||
-      nft.description.toLowerCase().includes(query) ||
-      nft.artist.toLowerCase().includes(query) ||
-      nft.tokenId.includes(query)
+      (nft.name || '').toLowerCase().includes(query) ||
+      (nft.description || '').toLowerCase().includes(query) ||
+      (nft.artist || '').toLowerCase().includes(query) ||
+      (nft.tokenId || '').includes(query)
     );
   }
 
   // Apply owner filter
   if (filters.owner) {
     filtered = filtered.filter(nft => 
-      nft.owner.toLowerCase().includes(filters.owner!.toLowerCase())
+      (nft.owner || '').toLowerCase().includes(filters.owner!.toLowerCase())
     );
   }
 
   // Apply rarity filter
   if (filters.rarity) {
     filtered = filtered.filter(nft => 
-      nft.rarity?.toLowerCase() === filters.rarity?.toLowerCase()
+      (nft.rarity || '').toLowerCase() === filters.rarity?.toLowerCase()
     );
   }
 
@@ -71,9 +71,9 @@ export const filterAndSortNFTs = (nfts: NFTData[], searchQuery: string, filters:
       case 'oldest':
         return new Date(a.mintDate || 0).getTime() - new Date(b.mintDate || 0).getTime();
       case 'name':
-        return a.name.localeCompare(b.name);
+        return (a.name || '').localeCompare(b.name || '');
       case 'artist':
-        return a.artist.localeCompare(b.artist);
+        return (a.artist || '').localeCompare(b.artist || '');
       default:
         return 0;
     }
