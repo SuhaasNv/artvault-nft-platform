@@ -17,6 +17,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
 import { ARTVAULT_ADDRESS, ARTVAULT_ABI } from '@/contracts/config';
 import axios from 'axios';
+import { NFTGridSkeleton } from '@/components/ui/NFTCardSkeleton';
 
 interface NFTMetadata {
   name: string;
@@ -214,9 +215,11 @@ export default function GalleryPage() {
 
           {/* Loading State */}
           {isLoading && nfts.length === 0 && (
-            <div className="text-center py-20">
-              <div className="inline-block animate-spin text-6xl mb-4">⏳</div>
-              <p className="text-gray-600 dark:text-gray-400">Loading NFTs...</p>
+            <div className="space-y-6">
+              <div className="text-center">
+                <p className="text-gray-600 dark:text-gray-400 mb-8">Loading NFTs...</p>
+              </div>
+              <NFTGridSkeleton count={8} />
             </div>
           )}
 
@@ -250,10 +253,7 @@ export default function GalleryPage() {
                 >
                   {nft.loading ? (
                     // Loading skeleton
-                    <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 animate-pulse">
-                      <div className="flex items-center justify-center h-full">
-                        <span className="text-4xl animate-spin">⏳</span>
-                      </div>
+                    <div className="aspect-square bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer">
                     </div>
                   ) : (
                     <>

@@ -161,3 +161,13 @@ button:active, a:active {
   animation: float-slow 12s ease-in-out infinite;
   animation-delay: 1s;
 }
+
+/* Shimmer animation for loading skeletons */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
