@@ -19,6 +19,7 @@ import { ARTVAULT_ADDRESS, ARTVAULT_ABI } from '@/contracts/config';
 import { NFTGridSkeleton } from '@/components/ui/NFTCardSkeleton';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { NFTCard } from '@/components/NFTCard';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 interface NFTMetadata {
   name: string;
@@ -77,7 +78,8 @@ export default function GalleryPage() {
 
       {/* Main Content */}
       <div className="pt-24 pb-20 px-6 md:px-8">
-        <div className="max-w-7xl mx-auto">
+        <ErrorBoundary>
+          <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4">
@@ -131,7 +133,8 @@ export default function GalleryPage() {
               </div>
             )}
           </div>
-        </div>
+          </div>
+        </ErrorBoundary>
       </div>
     </div>
   );

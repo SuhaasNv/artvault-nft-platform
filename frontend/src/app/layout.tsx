@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Web3Provider } from "@/providers/Web3Provider";
 import { Toaster } from "react-hot-toast";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,43 +20,45 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Web3Provider>
-          {children}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#363636',
-                color: '#fff',
-                borderRadius: '12px',
-                padding: '16px',
-                fontSize: '14px',
-                fontWeight: '500',
-                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-              },
-              success: {
-                iconTheme: {
-                  primary: '#10B981',
-                  secondary: '#fff',
+        <ErrorBoundary>
+          <Web3Provider>
+            {children}
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
                 },
-              },
-              error: {
-                iconTheme: {
-                  primary: '#EF4444',
-                  secondary: '#fff',
+                success: {
+                  iconTheme: {
+                    primary: '#10B981',
+                    secondary: '#fff',
+                  },
                 },
-              },
-              loading: {
-                iconTheme: {
-                  primary: '#3B82F6',
-                  secondary: '#fff',
+                error: {
+                  iconTheme: {
+                    primary: '#EF4444',
+                    secondary: '#fff',
+                  },
                 },
-              },
-            }}
-          />
-        </Web3Provider>
+                loading: {
+                  iconTheme: {
+                    primary: '#3B82F6',
+                    secondary: '#fff',
+                  },
+                },
+              }}
+            />
+          </Web3Provider>
+        </ErrorBoundary>
       </body>
     </html>
   );

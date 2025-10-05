@@ -19,6 +19,7 @@ import Link from 'next/link';
 import { ARTVAULT_ADDRESS, ARTVAULT_ABI } from '@/contracts/config';
 import axios from 'axios';
 import { NFTGridSkeleton } from '@/components/ui/NFTCardSkeleton';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 interface NFTMetadata {
   name: string;
@@ -198,7 +199,8 @@ export default function MyNFTsPage() {
 
       {/* Main Content */}
       <div className="pt-24 pb-20 px-6 md:px-8">
-        <div className="max-w-7xl mx-auto">
+        <ErrorBoundary>
+          <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4">
@@ -374,7 +376,8 @@ export default function MyNFTsPage() {
               </div>
             </div>
           )}
-        </div>
+          </div>
+        </ErrorBoundary>
       </div>
     </div>
   );

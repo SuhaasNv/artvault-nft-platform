@@ -1,11 +1,20 @@
 import Link from 'next/link';
 import { useNFTData } from '@/hooks/useNFTData';
+import { NFTCardErrorBoundary } from './NFTErrorBoundary';
 
 interface NFTCardProps {
   tokenId: number;
 }
 
 export function NFTCard({ tokenId }: NFTCardProps) {
+  return (
+    <NFTCardErrorBoundary>
+      <NFTCardContent tokenId={tokenId} />
+    </NFTCardErrorBoundary>
+  );
+}
+
+function NFTCardContent({ tokenId }: NFTCardProps) {
   const nft = useNFTData(tokenId);
 
   if (nft.loading) {
@@ -27,6 +36,17 @@ export function NFTCard({ tokenId }: NFTCardProps) {
             <div className="animate-pulse rounded-md bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer h-4 w-16"></div>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (nft.error || !nft.metadata) {
+    console.error(`Error rendering NFTCard for #${tokenId}:`, nft.error);
+    return (
+      <div className="group relative bg-red-100 dark:bg-red-950 rounded-2xl overflow-hidden border border-red-200 dark:border-red-800 p-4 text-center">
+        <h3 className="text-lg font-bold text-red-800 dark:text-red-200 mb-2">Error Loading NFT #{tokenId}</h3>
+        <p className="text-sm text-red-600 dark:text-red-400">{nft.error || 'Unknown error'}</p>
+        <p className="text-xs text-red-500 dark:text-red-300 mt-2">Please try refreshing the page.</p>
       </div>
     );
   }
