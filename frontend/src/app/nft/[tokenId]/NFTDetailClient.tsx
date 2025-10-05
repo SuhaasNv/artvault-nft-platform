@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { ARTVAULT_ADDRESS, ARTVAULT_ABI } from '@/contracts/config';
 import { ExternalLink, User, Copy, Check, ArrowLeft, Send } from 'lucide-react';
@@ -182,12 +183,15 @@ export default function NFTDetailClient({ tokenId }: NFTDetailClientProps) {
           {/* NFT Details */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* NFT Image */}
-            <div className="aspect-square bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-950 dark:via-purple-950 dark:to-pink-950 rounded-2xl overflow-hidden">
+            <div className="relative aspect-square bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-950 dark:via-purple-950 dark:to-pink-950 rounded-2xl overflow-hidden">
               {metadata?.image ? (
-                <img
+                <Image
                   src={metadata.image}
                   alt={metadata.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
+                  priority={false}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">

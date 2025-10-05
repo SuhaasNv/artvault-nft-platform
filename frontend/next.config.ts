@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   images: {
     unoptimized: true,
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'cloudflare-ipfs.com' },
+      { protocol: 'https', hostname: 'gateway.pinata.cloud' },
+      { protocol: 'https', hostname: 'ipfs.io' },
+      { protocol: 'https', hostname: 'dweb.link' },
+      { protocol: 'https', hostname: 'ipfs.infura.io' },
+    ],
   },
   // Disable server-side features for static export
   // experimental: {

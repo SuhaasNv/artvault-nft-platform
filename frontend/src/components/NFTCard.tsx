@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { useNFTData } from '@/hooks/useNFTData';
 import { NFTCardErrorBoundary } from './NFTErrorBoundary';
 
@@ -59,21 +60,18 @@ function NFTCardContent({ tokenId }: NFTCardProps) {
       {/* NFT Image */}
       <div className="aspect-square bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-950 dark:via-purple-950 dark:to-pink-950 relative overflow-hidden">
         {nft.metadata?.image && nft.metadata.image.trim() !== '' ? (
-          <img
+          <Image
             src={nft.metadata.image}
             alt={nft.metadata.name || `NFT #${tokenId}`}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            className="object-cover group-hover:scale-110 transition-transform duration-300"
             onError={(e) => {
               console.error('❌ Image failed to load for NFT #' + tokenId + ':', nft.metadata?.image);
-              // Hide the broken image and show fallback
-              e.currentTarget.style.display = 'none';
-              const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-              if (fallback) fallback.style.display = 'flex';
+              const el = (e.target as HTMLElement)?.parentElement?.nextElementSibling as HTMLElement;
+              if (el) el.style.display = 'flex';
             }}
-            onLoad={() => {
-              console.log('✅ Image loaded successfully for NFT #' + tokenId + ':', nft.metadata?.image);
-            }}
-            loading="lazy"
+            priority={false}
           />
         ) : null}
         
