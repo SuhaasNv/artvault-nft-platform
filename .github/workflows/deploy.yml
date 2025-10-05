@@ -3,8 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build-and-deploy:
@@ -15,8 +13,11 @@ jobs:
       id-token: write
     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
       
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -37,11 +38,18 @@ jobs:
           touch out/.nojekyll
           echo "GitHub Pages build complete."
         
-    - name: Deploy to GitHub Pages
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/main'
+        if: success() && github.ref == 'refs/heads/main'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./frontend/out
           publish_branch: gh-pages
+          force_orphan: true
+          clean: true
         cname: # Optional: add your custom domain here
