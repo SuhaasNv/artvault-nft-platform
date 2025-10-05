@@ -301,8 +301,12 @@ export default function MyNFTsPage() {
                         {nft.metadata?.image ? (
                           <img
                             src={nft.metadata.image}
-                            alt={nft.metadata.name}
+                            alt={nft.metadata.name || `NFT #${nft.tokenId}`}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => {
+                              console.error('Image failed to load:', nft.metadata?.image);
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                         ) : (
                           <div className="flex items-center justify-center h-full">

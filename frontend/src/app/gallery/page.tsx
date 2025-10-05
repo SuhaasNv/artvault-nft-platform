@@ -16,16 +16,15 @@ import { useReadContract } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
 import { ARTVAULT_ADDRESS, ARTVAULT_ABI } from '@/contracts/config';
-import axios from 'axios';
 import { NFTGridSkeleton } from '@/components/ui/NFTCardSkeleton';
 import { SearchBar } from '@/components/ui/SearchBar';
-import { FilterPanel, FilterOptions } from '@/components/ui/FilterPanel';
-import { filterAndSortNFTs, getFilterStats, NFTData } from '@/lib/filterUtils';
+import { NFTCard } from '@/components/NFTCard';
 
 interface NFTMetadata {
   name: string;
   description: string;
   image: string;
+  artist?: string;
   attributes?: Array<{ trait_type: string; value: string }>;
 }
 
@@ -37,156 +36,17 @@ interface NFT {
 }
 
 export default function GalleryPage() {
-  const [nfts, setNfts] = useState<NFT[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<FilterOptions>({ sortBy: 'newest' });
 
   // Get total supply of NFTs
-  const { data: totalSupply } = useReadContract({
+  const { data: totalSupply, isLoading: isLoadingSupply } = useReadContract({
     address: ARTVAULT_ADDRESS,
     abi: ARTVAULT_ABI,
     functionName: 'getTotalSupply',
   });
 
-  // Load all NFT metadata
-  useEffect(() => {
-    const loadNFTs = async () => {
-      if (!totalSupply) {
-        setIsLoading(false);
-        return;
-      }
-
-      const supply = Number(totalSupply);
-      console.log('📊 Total NFTs minted:', supply);
-
-      if (supply === 0) {
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-
-      // Create array of NFT objects
-      const nftArray: NFT[] = Array.from({ length: supply }, (_, i) => ({
-        tokenId: i,
-        tokenURI: '',
-        loading: true,
-      }));
-
-      setNfts(nftArray);
-
-      // Fetch metadata for each NFT
-      for (let i = 0; i < supply; i++) {
-        try {
-          console.log(`🔍 Loading NFT #${i}...`);
-          
-          // We need to use wagmi's readContract to fetch tokenURI
-          // For now, we'll use a dynamic import approach
-          const { readContract } = await import('wagmi/actions');
-          const { getDefaultConfig } = await import('@rainbow-me/rainbowkit');
-          const { sepolia } = await import('wagmi/chains');
-          const { http } = await import('wagmi');
-          
-          // Create a config for reading
-          const config = getDefaultConfig({
-            appName: 'ArtVault',
-            projectId: 'c82b1d0e0b5f8c0e0b5f8c0e0b5f8c0e',
-            chains: [sepolia],
-            transports: {
-              [sepolia.id]: http(),
-            },
-            ssr: false,
-          });
-
-          // Fetch token URI from the smart contract
-          const tokenURI = await readContract(config, {
-            address: ARTVAULT_ADDRESS,
-            abi: ARTVAULT_ABI,
-            functionName: 'tokenURI',
-            args: [BigInt(i)],
-          }) as string;
-
-          console.log(`📝 Token URI for #${i}:`, tokenURI);
-
-          // Fetch metadata from IPFS
-          if (tokenURI) {
-            try {
-              const metadataResponse = await axios.get(tokenURI);
-              const metadata: NFTMetadata = metadataResponse.data;
-              
-              console.log(`✅ Loaded metadata for #${i}:`, metadata);
-
-              setNfts(prev => prev.map(nft => 
-                nft.tokenId === i 
-                  ? { 
-                      ...nft, 
-                      tokenURI,
-                      loading: false,
-                      metadata,
-                    }
-                  : nft
-              ));
-            } catch (metadataError) {
-              console.error(`❌ Error loading metadata for NFT ${i}:`, metadataError);
-              setNfts(prev => prev.map(nft => 
-                nft.tokenId === i 
-                  ? { 
-                      ...nft, 
-                      tokenURI,
-                      loading: false,
-                      metadata: {
-                        name: `NFT #${i}`,
-                        description: 'Error loading metadata from IPFS',
-                        image: '',
-                      }
-                    }
-                  : nft
-              ));
-            }
-          }
-        } catch (error) {
-          console.error(`❌ Error loading NFT ${i}:`, error);
-          setNfts(prev => prev.map(nft => 
-            nft.tokenId === i 
-              ? { 
-                  ...nft, 
-                  loading: false,
-                  metadata: {
-                    name: `NFT #${i}`,
-                    description: 'Error loading NFT data',
-                    image: '',
-                  }
-                }
-              : nft
-          ));
-        }
-      }
-
-      setIsLoading(false);
-    };
-
-    loadNFTs();
-  }, [totalSupply]);
-
-  // Filter and sort NFTs based on search and filters
-  const filteredNFTs = filterAndSortNFTs(
-    nfts.map(nft => ({
-      tokenId: nft.tokenId.toString(),
-      name: nft.metadata?.name || `NFT #${nft.tokenId}`,
-      description: nft.metadata?.description || '',
-      image: nft.metadata?.image || '',
-      artist: nft.metadata?.attributes?.find(attr => attr.trait_type === 'Artist')?.value || 'Unknown',
-      owner: nft.owner || '',
-      rarity: nft.metadata?.attributes?.find(attr => attr.trait_type === 'Rarity')?.value,
-      mintDate: new Date(), // We'll need to get this from the contract
-      attributes: nft.metadata?.attributes
-    })),
-    searchQuery,
-    filters
-  );
-
-  const filterStats = getFilterStats(nfts, searchQuery, filters);
+  const supply = totalSupply ? Number(totalSupply) : 0;
+  const isLoading = isLoadingSupply;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-black dark:via-gray-950 dark:to-black">
@@ -226,176 +86,53 @@ export default function GalleryPage() {
             <p className="text-lg text-gray-600 dark:text-gray-400">
               Explore all minted artworks in the ArtVault collection
             </p>
-            {totalSupply && (
-              <div className="mt-6">
-                <span className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950/20 rounded-full px-6 py-2 border border-blue-200 dark:border-blue-800">
-                  <span className="text-blue-600 dark:text-blue-400 font-semibold">
-                    {Number(totalSupply)} NFTs Minted
-                  </span>
-                </span>
-              </div>
-            )}
           </div>
 
-          {/* Search and Filter Section */}
+          {/* Search Bar */}
           <div className="mb-8 space-y-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1">
+            <div className="flex justify-center">
+              <div className="w-full max-w-2xl">
                 <SearchBar
                   placeholder="Search NFTs by name, artist, or description..."
                   onSearch={setSearchQuery}
                 />
               </div>
-              <FilterPanel onFiltersChange={setFilters} />
             </div>
-            
-            {/* Filter Stats */}
-            {filterStats.hasFilters && (
-              <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 rounded-lg px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                    Showing {filterStats.showing} of {filterStats.total} NFTs
-                  </span>
-                  {searchQuery && (
-                    <span className="text-sm text-blue-600 dark:text-blue-400">
-                      for "{searchQuery}"
-                    </span>
-                  )}
-                </div>
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setFilters({ sortBy: 'newest' });
-                  }}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
+          </div>
+
+          {/* NFT Grid */}
+          <div className="space-y-6">
+            {isLoading ? (
+              <div className="text-center">
+                <p className="text-gray-600 dark:text-gray-400 mb-8">Loading NFTs...</p>
+                <NFTGridSkeleton count={8} />
+              </div>
+            ) : supply === 0 ? (
+              <div className="text-center py-20">
+                <div className="text-6xl mb-4">🎨</div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  No NFTs yet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-8">
+                  Be the first to mint an NFT on ArtVault!
+                </p>
+                <Link 
+                  href="/mint"
+                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
                 >
-                  Clear all
-                </button>
+                  Mint Your First NFT
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {Array.from({ length: supply }, (_, i) => (
+                  <NFTCard key={i} tokenId={i} />
+                ))}
               </div>
             )}
           </div>
-
-          {/* Loading State */}
-          {isLoading && nfts.length === 0 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <p className="text-gray-600 dark:text-gray-400 mb-8">Loading NFTs...</p>
-              </div>
-              <NFTGridSkeleton count={8} />
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!isLoading && filteredNFTs.length === 0 && (
-            <div className="text-center py-20">
-              <div className="text-6xl mb-6">🎨</div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                No NFTs Yet
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-8">
-                Be the first to mint an NFT in the ArtVault collection!
-              </p>
-              <Link
-                href="/mint"
-                className="inline-block bg-gray-900 dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-semibold hover:scale-105 transition-all"
-              >
-                Mint Your First NFT
-              </Link>
-            </div>
-          )}
-
-          {/* NFT Grid */}
-          {filteredNFTs.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredNFTs.map((nft) => (
-                <Link
-                  key={nft.tokenId}
-                  href={`/nft/${nft.tokenId}`}
-                  className="group relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:shadow-2xl hover:scale-105 transition-all duration-300"
-                >
-                  {/* NFT Image */}
-                  <div className="aspect-square bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-950 dark:via-purple-950 dark:to-pink-950 relative overflow-hidden">
-                    {nft.image ? (
-                      <img
-                        src={nft.image}
-                        alt={nft.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <span className="text-6xl">🎨</span>
-                      </div>
-                    )}
-                        
-                        {/* Hover overlay */}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <span className="text-white font-semibold">View Details</span>
-                        </div>
-                      </div>
-
-                    {/* NFT Info */}
-                    <div className="p-4">
-                      <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-1">
-                        {nft.name}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                        {nft.description || 'No description available'}
-                      </p>
-                      
-                      {/* Artist and Rarity */}
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          by {nft.artist}
-                        </span>
-                        {nft.rarity && (
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            nft.rarity === 'Legendary' ? 'bg-yellow-100 text-yellow-800' :
-                            nft.rarity === 'Epic' ? 'bg-purple-100 text-purple-800' :
-                            nft.rarity === 'Rare' ? 'bg-blue-100 text-blue-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {nft.rarity}
-                          </span>
-                        )}
-                      </div>
-                      
-                      {/* Token ID Badge */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono text-gray-500 dark:text-gray-500">
-                          Token #{nft.tokenId}
-                        </span>
-                        <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
-                          ERC-721
-                        </span>
-                      </div>
-                    </div>
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {/* Call to Action */}
-          {nfts.length > 0 && (
-            <div className="text-center mt-16">
-              <div className="inline-block bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-3xl p-8 border border-gray-200 dark:border-gray-800">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                  Want to add your art?
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Join the ArtVault collection and mint your own NFT
-                </p>
-                <Link
-                  href="/mint"
-                  className="inline-block bg-gray-900 dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-semibold hover:scale-105 transition-all"
-                >
-                  Mint Your NFT
-                </Link>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
   );
 }
-

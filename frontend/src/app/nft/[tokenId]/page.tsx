@@ -268,6 +268,10 @@ export default function NFTDetailPage() {
                       src={metadata.image}
                       alt={metadata.name}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Image failed to load:', metadata.image);
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full">

@@ -25,6 +25,7 @@ const config = getDefaultConfig({
   
   // Project ID from WalletConnect
   // Using a generic public project ID for testing
+  // Note: This will show a warning but won't affect functionality
   projectId: 'c82b1d0e0b5f8c0e0b5f8c0e0b5f8c0e',
   
   // Which blockchain networks to support
