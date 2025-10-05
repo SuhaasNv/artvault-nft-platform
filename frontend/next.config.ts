@@ -11,6 +11,16 @@ const nextConfig: NextConfig = {
     // your project has type errors.
     ignoreBuildErrors: true,
   },
+  // Enable static export for GitHub Pages
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true,
+  },
+  // Disable server-side features for static export
+  // experimental: {
+  //   appDir: true,
+  // },
 };
 
 export default nextConfig;
