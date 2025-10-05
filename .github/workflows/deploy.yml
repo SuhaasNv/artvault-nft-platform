@@ -18,38 +18,38 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-        
-    - name: Install dependencies
-      run: |
-        cd frontend
-        npm ci
-        
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
       - name: Build static site
-      run: |
-        cd frontend
+        run: |
+          cd frontend
           npm run export
           touch out/.nojekyll
           echo "GitHub Pages build complete."
-        
+
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v3
         if: success() && github.ref == 'refs/heads/main'
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./frontend/out
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/out
           publish_branch: gh-pages
           force_orphan: true
           clean: true
-        cname: # Optional: add your custom domain here
+          # cname: your-custom-domain.com
