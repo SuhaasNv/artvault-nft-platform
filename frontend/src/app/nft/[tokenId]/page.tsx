@@ -17,6 +17,7 @@ import { useState, useEffect } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { ARTVAULT_ADDRESS, ARTVAULT_ABI, ETHERSCAN_LINK } from '@/contracts/config';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
@@ -74,6 +75,10 @@ export default function NFTDetailPage() {
       // Refetch owner to update UI
       refetchOwner();
       
+      toast.success('✅ NFT transferred successfully!', {
+        duration: 5000,
+      });
+      
       // Show success message and redirect after delay
       setTimeout(() => {
         router.push('/my-nfts');
@@ -84,27 +89,28 @@ export default function NFTDetailPage() {
   // Handle transfer submission
   const handleTransfer = () => {
     if (!recipientAddress) {
-      setTransferError('Please enter a recipient address');
+      toast.error('Please enter a recipient address');
       return;
     }
 
     if (!isAddress(recipientAddress)) {
-      setTransferError('Invalid Ethereum address');
+      toast.error('Invalid Ethereum address');
       return;
     }
 
     if (recipientAddress.toLowerCase() === address?.toLowerCase()) {
-      setTransferError('Cannot transfer to yourself');
+      toast.error('Cannot transfer to yourself');
       return;
     }
 
     if (!address) {
-      setTransferError('Wallet not connected');
+      toast.error('Wallet not connected');
       return;
     }
 
     setTransferError('');
     setIsTransferring(true);
+    toast.loading('🔄 Transferring NFT...');
 
     try {
       console.log('🔄 Transferring NFT...');

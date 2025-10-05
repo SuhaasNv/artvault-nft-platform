@@ -17,6 +17,7 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { parseEther } from 'viem';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { ARTVAULT_ADDRESS, ARTVAULT_ABI } from '@/contracts/config';
 import { uploadImageToIPFS, uploadMetadataToIPFS, createNFTMetadata, getIPFSUrl } from '@/lib/pinata';
 
@@ -83,12 +84,12 @@ export default function MintPage() {
   // Handle the complete minting process
   const handleMint = async () => {
     if (!isConnected || !metadata.image || !address) {
-      setErrorMessage('Please connect your wallet and upload an image');
+      toast.error('Please connect your wallet and upload an image');
       return;
     }
 
     if (!metadata.title.trim()) {
-      setErrorMessage('Please enter a title for your NFT');
+      toast.error('Please enter a title for your NFT');
       return;
     }
 
@@ -98,11 +99,14 @@ export default function MintPage() {
       setErrorMessage('');
       setIsUploading(true);
       
+      const uploadToast = toast.loading('📤 Uploading image to IPFS...');
       console.log('📤 Uploading image to IPFS...');
       const imageHash = await uploadImageToIPFS(metadata.image);
       console.log('✅ Image uploaded! IPFS Hash:', imageHash);
+      toast.dismiss(uploadToast);
 
       // Step 2: Create and upload metadata to IPFS
+      const metadataToast = toast.loading('📝 Creating metadata...');
       console.log('📤 Creating metadata...');
       const nftMetadata = createNFTMetadata(
         metadata.title,
@@ -114,12 +118,14 @@ export default function MintPage() {
       console.log('📤 Uploading metadata to IPFS...');
       const metadataHash = await uploadMetadataToIPFS(nftMetadata);
       console.log('✅ Metadata uploaded! IPFS Hash:', metadataHash);
+      toast.dismiss(metadataToast);
 
       const tokenURI = getIPFSUrl(metadataHash);
       console.log('🔗 Token URI:', tokenURI);
 
       // Step 3: Mint NFT on the blockchain
       setMintingStatus('minting');
+      const mintToast = toast.loading('⛓️ Minting NFT on blockchain...');
       console.log('⛓️ Minting NFT on blockchain...');
       
       writeContract({
@@ -129,12 +135,13 @@ export default function MintPage() {
         args: [address, tokenURI],
         value: parseEther('0.01'), // 0.01 ETH mint price
       });
+      toast.dismiss(mintToast);
 
       // The transaction status will be handled by the useWaitForTransactionReceipt hook
       } catch (error: unknown) {
       console.error('❌ Minting error:', error);
       setMintingStatus('error');
-      setErrorMessage((error as Error).message || 'Failed to mint NFT. Please try again.');
+      toast.error((error as Error).message || 'Failed to mint NFT. Please try again.');
       setIsUploading(false);
     }
   };
@@ -144,12 +151,15 @@ export default function MintPage() {
     setMintingStatus('success');
     setIsUploading(false);
     console.log('🎉 NFT Minted successfully!');
+    toast.success('🎉 NFT minted successfully!', {
+      duration: 6000,
+    });
   }
 
   // Handle transaction error
   if (isError && mintingStatus === 'minting') {
     setMintingStatus('error');
-    setErrorMessage('Transaction failed. Please try again.');
+    toast.error('Transaction failed. Please try again.');
     setIsUploading(false);
   }
 

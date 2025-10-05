@@ -48,6 +48,8 @@
 ### 💎 Platform Features
 - **IPFS Storage** - Decentralized, permanent storage for artwork and metadata
 - **Rarity System** - NFT rarity badges (Legendary, Epic, Rare, Common)
+- **Toast Notifications** - Beautiful, professional notifications for all user actions
+- **Loading States** - Smooth loading indicators and progress feedback
 - **Search & Filter** - Find NFTs by name, owner, or attributes
 - **Responsive Design** - Flawless experience across all devices
 - **Loading States** - Professional skeleton loaders and feedback
